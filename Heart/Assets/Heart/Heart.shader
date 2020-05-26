@@ -64,7 +64,34 @@
                 float4 positionCS : SV_POSITION;
                 float3 positionWS : TEXCOORD1;
                 float4 color : COLOR;
-            };		               
+            };		 
+            
+            float Maskline(float pos,float lineNumber)
+            {    
+              return step(pos,0.1428571428571429 * lineNumber) - (step(pos,0.1428571428571429 * (lineNumber - 1.)));
+            }
+            
+            float3 GetRainbowColor(float i)
+            {
+                //Step Violet
+                float3 Violet = 	float3(0.57,0.0, 1.0) 	*  Maskline(i,7.);
+                float3 Purple = 	float3(0.27,0.0, 0.51)	*  Maskline(i,6.);
+                float3 blue 	=	float3(0.0, 	0.0, 1.0) 	*  Maskline(i,5.);
+                float3 Green	=	float3(0.0, 	1.0, 0.0) 	*  Maskline(i,4.);
+                float3 Yellow =	float3(1.0, 	1.0, 0.0) 	*  Maskline(i,3.);
+                float3 Orange =	float3(1.0, 	0.5, 0.0) 	*  Maskline(i,2.);
+                float3 Red	=	float3(1.0, 	0.0, 0.0) 	*  Maskline(i,1.);
+                return Violet + Purple + blue + Green + Yellow + Orange + Red;
+            }
+            
+            float3 smoothRainbowColor(float i)
+            {
+                i *= 0.1428571428571429 * 6;
+                float gradinStep = fmod(i, 0.1428571428571429) * 7;
+                float3 firstColor = GetRainbowColor(i);
+                float3 nextColor = GetRainbowColor(i + 0.1428571428571429);
+                return lerp(firstColor, nextColor, gradinStep);
+            }              
                 
             Varyings vert(Attributes input) 
             {
@@ -87,8 +114,8 @@
 			    float heatSize = _HeartSize;
 			    float heartEdge = pow((a2 + b2 - heatSize), 3) - a2*b3;
                 heartEdge = step(0, heartEdge);
-                half blendVlaue = sin(_ColorBlendSpeed * _Time.y);
-                half4 blendColor = lerp(_BaseColor, _BaseColor2, blendVlaue);
+                float blendVlaue = abs(sin(_ColorBlendSpeed * _Time.y));
+                half4 blendColor = half4(smoothRainbowColor(blendVlaue), 1);//lerp(_BaseColor, _BaseColor2, blendVlaue);
 			    half4 color = blendColor * (1 - heartEdge) * input.color;				    			          
 			    
 			    float heartEdge2 = pow((a2 + b2 - heatSize + _Edge), 3) - a2*b3;

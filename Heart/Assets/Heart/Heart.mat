@@ -52,7 +52,7 @@ Material:
     - _Blend: 0
     - _BumpScale: 1
     - _ColorBlendSpedd: 1
-    - _ColorBlendSpeed: 1
+    - _ColorBlendSpeed: 0.2
     - _Cull: 2
     - _Cutoff: 0.5
     - _DstBlend: 0
